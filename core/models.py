@@ -12,6 +12,9 @@ class Player(models.Model):
 	last_active = models.DateTimeField(
 		verbose_name="Zuletzt Aktiv")
 
+	def to_json(self):
+		return dict(username=self.username, uuid=self.uuid)
+
 
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):

@@ -1,25 +1,59 @@
 {% extends "base.html" %}
 
 {% block content %}
-	UUID: {{ uuid }}
+	<div>
+		UUID: {{ uuid }}
+	</div>
+	<div>
+		{% if user.is_authenticated %}
+			<a href="{% url 'admin:logout' %}?next={% url 'index' %}">Logout</a>
+		{% else %}
+			<a href="{% url 'admin:login' %}?next={% url 'index' %}">Login</a>
+		{% endif %}
+	</div>
+
+
+	<div>
+		{% if player %}
+
+			Player: {{ player.username }}
+		{% else %}
+			<form method="post" action="{% url 'index' %}">
+				{% csrf_token %}
+				{{ form }}
+				<input type="submit" value="Register">
+			</form>
+		{% endif %}
+	</div>
+
+	<div>
+		<a href="{% url 'clear_cookie'%}">Clear cache</a>
+	</div>
 
 	{% if user.is_authenticated %}
-		<a href="{% url 'admin:logout' %}?next={% url 'index' %}">Logout</a>
-	{% else %}
-		<a href="{% url 'admin:login' %}?next={% url 'index' %}">Login</a>
+
+		<div>
+			<a href="#" id="update">Update</a>
+			Here are the players: <div id="players"></div>
+
+		</div>
 	{% endif %}
-
-
-	{% if player %}
-
-		Player: {{ player.username }}
-	{% else %}
-		<form method="post" action="{% url 'index' %}">
-			{% csrf_token %}
-			{{ form }}
-			<input type="submit" value="Register">
-		</form>
-	{% endif %}
-
-	<a href="{% url 'clear_cookie'%}">Clear cache</a>
 {% endblock content %}
+
+{% block script %}
+	{{ block.super }}
+	<script type="text/javascript">
+		$("#update").click(function (){
+			$.ajax("{% url 'ajax:players' %}")
+			.done(function (data) {
+				$("#players").html("")
+				data["players"].forEach(function(value) {
+					console.log(value["username"], value["uuid"]);
+					div = document.createElement("div");
+					div.innerHTML = value["username"] + " " + value["uuid"]
+					$("#players").append(div)
+				})
+			})
+		});
+	</script>
+{% endblock script %}

@@ -53,6 +53,10 @@ class IndexView(TemplateView):
 
 	@classmethod
 	def clear_cookie(cls, request):
+		uuid = request.COOKIES[settings.ANONYMOUS_USER_COOKIE_ID]
+		Player.objects.filter(uuid=uuid).delete()
+
 		resp = redirect("index")
 		resp.delete_cookie(settings.ANONYMOUS_USER_COOKIE_ID)
+
 		return resp
