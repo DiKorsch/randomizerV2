@@ -1,4 +1,5 @@
 import datetime as dt
+from django.utils import timezone as tz
 
 from django.http import JsonResponse
 from django.core import serializers
@@ -6,7 +7,7 @@ from django.core import serializers
 from core.models import Player
 
 def players(request):
-	now = dt.datetime.now()
+	now = tz.now()
 	diff = dt.timedelta(hours=1)
 
 	data = {}

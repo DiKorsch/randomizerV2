@@ -43,17 +43,26 @@
 {% block script %}
 	{{ block.super }}
 	<script type="text/javascript">
-		$("#update").click(function (){
+
+		function update_players(players){
+			players.forEach(function(value) {
+				div = document.createElement("div");
+				div.innerHTML = value["username"] + " " + value["uuid"];
+
+				$("#players").append(div);
+			});
+		}
+
+		function get_players() {
 			$.ajax("{% url 'ajax:players' %}")
 			.done(function (data) {
 				$("#players").html("")
-				data["players"].forEach(function(value) {
-					console.log(value["username"], value["uuid"]);
-					div = document.createElement("div");
-					div.innerHTML = value["username"] + " " + value["uuid"]
-					$("#players").append(div)
-				})
-			})
-		});
+				update_players(data["players"]);
+			});
+		}
+
+		get_players();
+		setInterval(get_players, 10 * 1000);
+
 	</script>
 {% endblock script %}

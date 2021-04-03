@@ -1,13 +1,12 @@
 from django.conf import settings
 from django.shortcuts import redirect
+from django.utils import timezone as tz
 from django.views.generic import TemplateView
 
-import datetime
-
-from core.decorators import ensure_uuid
 from core.decorators import context_render
-from core.models import Player
+from core.decorators import ensure_uuid
 from core.forms import NewPlayerForm
+from core.models import Player
 
 
 class IndexView(TemplateView):
@@ -24,7 +23,7 @@ class IndexView(TemplateView):
 	def get(self, request, context, *args, **kwargs):
 
 		uuid = context["uuid"]
-		now = datetime.datetime.now()
+		now = tz.now()
 
 		try:
 			player = Player.objects.get(uuid=uuid)
@@ -42,9 +41,8 @@ class IndexView(TemplateView):
 	def post(self, request, context, *args, **kwargs):
 
 		uuid = context["uuid"]
-		now = datetime.datetime.now()
 
-		player = Player(uuid=uuid, last_active=now)
+		player = Player(uuid=uuid, last_active=tz.now())
 		form = NewPlayerForm(request.POST, instance=player)
 
 		player = form.save()
