@@ -38,25 +38,63 @@
 		</div>
 		<div>
 			<a href="#" id="randomize">Randomize</a>
-			Current game: <div id="game"></div>
+			Game setup: <div id="setup"></div>
+			Final: <div id="game"></div>
 		</div>
 	{% endif %}
 {% endblock content %}
 
 {% block script %}
 	{{ block.super }}
+	<script type="text/javascript">
+		function new_setup(player) {
+			username = $("#" + player["id"]).attr("username");
+
+			div = document.createElement("div");
+			div.innerHTML = [
+				username,
+				"Team:",
+				player["team"],
+
+				"Volk:",
+				player["nation"],
+			].join(" ")
+			div.classList.add("player-setup")
+			return div;
+		}
+
+		function update_setup(players, id) {
+			$(id).html("");
+
+			players.forEach(function (value){
+				$(id).append(new_setup(value))
+			});
+		}
+	</script>
 	{% if user.is_authenticated %}
 
 	<script type="text/javascript">
+
+		function new_player(player) {
+
+			div = document.createElement("div");
+			div.classList.add("player");
+			div.classList.add("selected");
+
+			div.id = player["uuid"];
+			div.setAttribute("username", player["username"]);
+			div.setAttribute("team", 0);
+			div.setAttribute("nation", "Random");
+			div.innerHTML = player["username"];
+
+			return div;
+		}
 
 		function update_players(players, id){
 			$(id).html("")
 
 			players.forEach(function(value) {
-				div = document.createElement("div");
-				div.innerHTML = value["username"] + " " + value["uuid"];
-
-				$(id).append(div);
+				$(id).append(new_player(value));
 			});
 		}
 
@@ -71,18 +109,28 @@
 		}
 
 		get_players("#players");
-		setInterval(get_players, 10 * 1000, "#players");
+		// setInterval(get_players, 10 * 1000, "#players");
 
 		$("#update").click(function (event) {
 			get_players("#players");
 		});
 	</script>
 
-
 	<script type="text/javascript">
 
 		function get_game_setup() {
+			setup = {}
+			setup["n_teams"] = 2
+			setup["players"] = $(".player.selected").map(
+				function (i, val) {
+					return {
+						id: val.id,
+						team: Number($(val).attr("team")),
+						nation: $(val).attr("nation"),
+					}
+			}).get();
 
+			return setup;
 		}
 
 		function randomize() {
@@ -98,7 +146,8 @@
 				dataType: 'json'
 			})
 			.done(function (data){
-				console.log(data)
+				update_setup(data["setup"]["players"], "#setup");
+				update_setup(data["final_setup"], "#game");
 			});
 		}
 
