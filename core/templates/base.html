@@ -1,25 +1,73 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <title>Randomizer</title>
   <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 </head>
-<body>
-  {% block modals %}
-  {% endblock %}
+<body class="is-preload">
+  <div id="wrapper" class="fade-in">
 
-  <div class="container-fluid">
-  {% block content %}
-  	This is the base template
-  {% endblock %}
+    {% block header %}
+      <header id="header">
+        <a class="logo">Randomizer</a>
+        <!-- <p>A simple template for telling the world when you'll launch your next big thing. Brought to you by <a href="http://html5up.net">HTML5 UP</a>.</p> -->
+      </header>
+    {% endblock %}
+
+    <nav id="nav">
+      {% block nav %}
+        <ul class="icons">
+          <li>
+            <a href="https://github.com/DiKorsch" target="_new" class="icon brands fa-github"><span class="label">GitHub</span></a>
+          </li>
+
+          <li>
+          {% if user.is_authenticated %}
+            <a href="{% url 'admin:logout' %}?next={% url 'index' %}" class="icon solid fa-sign-out-alt"><span class="label">Logout</span></a>
+          {% else %}
+            <a href="{% url 'admin:login' %}?next={% url 'index' %}" class="icon solid fa-sign-in-alt"><span class="label">Login</span></a>
+          {% endif %}
+          </li>
+        </ul>
+      {% endblock %}
+    </nav>
+
+    <div id="main">
+    {% block content %}
+    	This is the base template
+    {% endblock %}
+    </div>
+
+    {% block footer %}
+      <div id="copyright">
+        <ul class="copyright">
+          <li>&copy; Dimitri Korsch</li>
+          <li>Credits: <a href="http://html5up.net">HTML5 UP</a></li>
+        </ul>
+      </div>
+    {% endblock %}
   </div>
 
+
   {% block style %}
+    <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
+    <noscript><link rel="stylesheet" href="{% static 'assets/css/noscript.css' %}" /></noscript>
   {% endblock %}
 
   {% block script %}
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"> </script>
+      <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+      <script src="{% static 'assets/js/jquery.scrollex.min.js' %}"></script>
+      <script src="{% static 'assets/js/jquery.scrolly.min.js' %}"></script>
+      <script src="{% static 'assets/js/browser.min.js' %}"></script>
+      <script src="{% static 'assets/js/breakpoints.min.js' %}"></script>
+      <script src="{% static 'assets/js/util.js' %}"></script>
+      <script src="{% static 'assets/js/main.js' %}"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"> </script> -->
+
     <script type="text/javascript">
       function getCookie(name) {
         let cookieValue = null;

@@ -1,54 +1,89 @@
 {% extends "base.html" %}
 
+{% block nav %}
+	<ul class="links">
+	  <li class="active"><a>
+	    {% if player %}
+	      Your name: {{ player.username }}
+	    {% else %}
+	      Choose your name!
+	    {% endif %}
+	  </a></li>
+	</ul>
+	{{ block.super }}
+{% endblock %}
+
 {% block content %}
-	<div>
-		UUID: {{ uuid }}
-	</div>
-	<div>
+	<div class="row">
+		<div class="col-{% if user.is_authenticated %}4{% else %}12{% endif %} col-12-small">
+			{% if player %}
+				<div class="row">
+					<div class="col-12">
+						<a class="button icon solid fa-sync-alt small fit" href="{% url 'clear_cookie'%}">Rename</a>
+					</div>
+				</div>
+			{% else %}
+				<form method="post" action="{% url 'index' %}">
+					<div class="row">
+						{% csrf_token %}
+						<div class="col-6">
+							{{ form.username }}
+						</div>
+
+						<div class="col-6">
+							<input class="button small primary fit" type="submit" value="Register">
+						</div>
+					</div>
+				</form>
+			{% endif %}
+		</div>
+
 		{% if user.is_authenticated %}
-			<a href="{% url 'admin:logout' %}?next={% url 'index' %}">Logout</a>
-		{% else %}
-			<a href="{% url 'admin:login' %}?next={% url 'index' %}">Login</a>
+			<div class="col-3 col-12-small">
+				<button class="button small fit icon solid fa-arrow-circle-down" id="update">Update Players</button>
+			</div>
+			<div class="col-3 col-12-small">
+				<button class="button small fit primary icon solid fa-dice" id="randomize">Randomize</button>
+			</div>
+			<div class="col-2 col-12-small">
+				<h4>Players</h4>
+				<ol id="players"></ol>
+			</div>
 		{% endif %}
 	</div>
 
-
-	<div>
-		{% if player %}
-
-			Player: {{ player.username }}
-		{% else %}
-			<form method="post" action="{% url 'index' %}">
-				{% csrf_token %}
-				{{ form }}
-				<input type="submit" value="Register">
-			</form>
-		{% endif %}
+	<div class="row">
+		<div class="col-6">
+			<h3>Einstellung</h3>
+			<div class="table-wrapper">
+				<table>
+					<thead>
+						<tr>
+							<th>Player</th>
+							<th>Team</th>
+							<th>Volk</th>
+						</tr>
+					</thead>
+					<tbody id="setup"></tbody>
+				</table>
+			</div>
+		</div>
+		<div class="col-6">
+			<h3>Ergebnis</h3>
+			<div class="table-wrapper">
+				<table>
+					<thead>
+						<tr>
+							<th>Player</th>
+							<th>Team</th>
+							<th>Volk</th>
+						</tr>
+					</thead>
+					<tbody id="game"></tbody>
+				</table>
+			</div>
+		</div>
 	</div>
-
-	<div>
-		<a href="{% url 'clear_cookie'%}">Clear cache</a>
-	</div>
-
-	{% if user.is_authenticated %}
-
-		<div>
-			<a href="#" id="update">Update</a>
-			Here are the players: <div id="players"></div>
-		</div>
-		<div>
-			<a href="#" id="randomize">Randomize</a>
-			Game setup: <div id="setup"></div>
-			Final: <div id="game"></div>
-		</div>
-	{% else %}
-		<div>
-			<a href="#" id="get_setups">Refresh</a>
-			Game setup: <div id="setup"></div>
-			Final: <div id="game"></div>
-		</div>
-
-	{% endif %}
 {% endblock content %}
 
 {% block script %}
@@ -56,18 +91,21 @@
 	<script type="text/javascript">
 		function new_setup(player) {
 
-			div = document.createElement("div");
-			div.innerHTML = [
-				player["username"],
+			row = document.createElement("tr");
+			cell = document.createElement("td");
+			cell.innerHTML = player["username"];
+			row.append(cell)
 
-				"Team:",
-				player["team"],
+			cell = document.createElement("td");
+			cell.innerHTML = player["team"];
+			row.append(cell)
 
-				"Volk:",
-				player["nation"],
-			].join(" ")
-			div.classList.add("player-setup")
-			return div;
+			cell = document.createElement("td");
+			cell.innerHTML = player["nation"];
+			row.append(cell)
+
+			row.classList.add("player-setup")
+			return row;
 		}
 
 		function update_setup(players, id) {
@@ -85,6 +123,21 @@
 
 		// send every 5min a heartbeat to the server
 		setInterval($.ajax, 5 * 60 * 1000, {url: "{% url 'ajax:heartbeat' %}", method: "GET"});
+
+		function get_setups() {
+			$.ajax({
+				url: "{% url 'ajax:randomize'%}",
+				method: 'GET',
+			})
+			.done(update_setups);
+		}
+
+		get_setups();
+
+		{% if not user.is_authenticated %}
+			setInterval(get_setups, 5 * 1000);
+		{% endif %}
+
 	</script>
 	{% if user.is_authenticated %}
 
@@ -92,17 +145,17 @@
 
 		function new_player(player) {
 
-			div = document.createElement("div");
-			div.classList.add("player");
-			div.classList.add("selected");
+			el = document.createElement("li");
+			el.classList.add("player");
+			el.classList.add("selected");
 
-			div.id = player["uuid"];
-			div.setAttribute("username", player["username"]);
-			div.setAttribute("team", 0);
-			div.setAttribute("nation", "Random");
-			div.innerHTML = player["username"];
+			el.id = player["uuid"];
+			el.setAttribute("username", player["username"]);
+			el.setAttribute("team", 0);
+			el.setAttribute("nation", "Random");
+			el.innerHTML = player["username"];
 
-			return div;
+			return el;
 		}
 
 		function update_players(players, id){
@@ -167,20 +220,5 @@
 		$("#randomize").click(randomize);
 	</script>
 
-	{% else %}
-	<script type="text/javascript">
-		function get_setups() {
-			$.ajax({
-				url: "{% url 'ajax:randomize'%}",
-				method: 'GET',
-			})
-			.done(update_setups);
-		}
-
-		get_setups();
-		setInterval(get_setups, 5 * 1000);
-		$("#get_setups").click(get_setups);
-
-	</script>
 	{% endif %}
 {% endblock script %}

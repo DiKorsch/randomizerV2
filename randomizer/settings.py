@@ -132,4 +132,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [
+    BASE_DIR / "core/media"
+]
+
 ANONYMOUS_USER_COOKIE_ID = "anouserID"
