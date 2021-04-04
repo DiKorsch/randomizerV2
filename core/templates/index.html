@@ -35,34 +35,74 @@
 		<div>
 			<a href="#" id="update">Update</a>
 			Here are the players: <div id="players"></div>
-
+		</div>
+		<div>
+			<a href="#" id="randomize">Randomize</a>
+			Current game: <div id="game"></div>
 		</div>
 	{% endif %}
 {% endblock content %}
 
 {% block script %}
 	{{ block.super }}
+	{% if user.is_authenticated %}
+
 	<script type="text/javascript">
 
-		function update_players(players){
+		function update_players(players, id){
+			$(id).html("")
+
 			players.forEach(function(value) {
 				div = document.createElement("div");
 				div.innerHTML = value["username"] + " " + value["uuid"];
 
-				$("#players").append(div);
+				$(id).append(div);
 			});
 		}
 
-		function get_players() {
-			$.ajax("{% url 'ajax:players' %}")
+		function get_players(id) {
+			$.ajax({
+				url: "{% url 'ajax:players' %}",
+				method: 'GET',
+			})
 			.done(function (data) {
-				$("#players").html("")
-				update_players(data["players"]);
+				update_players(data["players"], id);
 			});
 		}
 
-		get_players();
-		setInterval(get_players, 10 * 1000);
+		get_players("#players");
+		setInterval(get_players, 10 * 1000, "#players");
 
+		$("#update").click(function (event) {
+			get_players("#players");
+		});
 	</script>
+
+
+	<script type="text/javascript">
+
+		function get_game_setup() {
+
+		}
+
+		function randomize() {
+			$.ajax({
+				url: "{% url 'ajax:randomize'%}",
+				method: 'POST',
+				data: {
+					json: JSON.stringify(get_game_setup())
+				},
+				headers: {
+					"X-CSRFToken": getCookie('csrftoken'),
+				},
+				dataType: 'json'
+			})
+			.done(function (data){
+				console.log(data)
+			});
+		}
+
+		$("#randomize").click(randomize);
+	</script>
+	{% endif %}
 {% endblock script %}

@@ -3,6 +3,7 @@ from django.utils import timezone as tz
 
 from django.http import JsonResponse
 from django.core import serializers
+from django.views import View
 
 from core.models import Player
 
@@ -15,4 +16,10 @@ def players(request):
 
 	data["players"] = [p.to_json() for p in players]
 	return JsonResponse(data)
+
+class Randomize(View):
+
+	def post(self, request):
+		print(request.POST)
+		return JsonResponse({"bar": 2})
 
