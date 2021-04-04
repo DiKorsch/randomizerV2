@@ -1,16 +1,36 @@
-import random
 import datetime as dt
+import random
 import simplejson as json
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
+from django.http import HttpResponse
 from django.http import JsonResponse
 from django.utils import timezone as tz
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.http import require_GET
 
+from core.decorators import ensure_uuid
 from core.models import Player
 
+@require_GET
+@ensure_uuid
+def heartbeat(request):
+	uuid = request.COOKIES[settings.ANONYMOUS_USER_COOKIE_ID]
+
+	try:
+		player = Player.objects.get(uuid=uuid)
+		player.last_active = tz.now()
+		player.save()
+
+	except Player.DoesNotExist:
+		pass
+
+	return HttpResponse("")
+
+@require_GET
 def players(request):
 	now = tz.now()
 	diff = dt.timedelta(hours=1)

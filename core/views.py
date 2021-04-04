@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 
 from core.decorators import context_render
 from core.decorators import ensure_uuid
+from django.utils.decorators import method_decorator
 from core.forms import NewPlayerForm
 from core.models import Player
 
@@ -18,7 +19,7 @@ class IndexView(TemplateView):
 		context["uuid"] = uuid
 		return context
 
-	@ensure_uuid
+	@method_decorator(ensure_uuid)
 	@context_render
 	def get(self, request, context, *args, **kwargs):
 

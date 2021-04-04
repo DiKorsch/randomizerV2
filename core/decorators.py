@@ -6,7 +6,7 @@ from functools import wraps
 def ensure_uuid(method):
 
 	@wraps(method)
-	def inner(self, request, *args, **kwargs):
+	def inner(request, *args, **kwargs):
 		key = settings.ANONYMOUS_USER_COOKIE_ID
 		cookies = request.COOKIES
 
@@ -15,7 +15,7 @@ def ensure_uuid(method):
 
 		uuid = cookies[key]
 
-		resp = method(self, request, *args, **kwargs)
+		resp = method(request, *args, **kwargs)
 		resp.set_cookie(key, uuid)
 		return resp
 
