@@ -41,6 +41,13 @@
 			Game setup: <div id="setup"></div>
 			Final: <div id="game"></div>
 		</div>
+	{% else %}
+		<div>
+			<a href="#" id="get_setups">Refresh</a>
+			Game setup: <div id="setup"></div>
+			Final: <div id="game"></div>
+		</div>
+
 	{% endif %}
 {% endblock content %}
 
@@ -48,11 +55,11 @@
 	{{ block.super }}
 	<script type="text/javascript">
 		function new_setup(player) {
-			username = $("#" + player["id"]).attr("username");
 
 			div = document.createElement("div");
 			div.innerHTML = [
-				username,
+				player["username"],
+
 				"Team:",
 				player["team"],
 
@@ -69,6 +76,11 @@
 			players.forEach(function (value){
 				$(id).append(new_setup(value))
 			});
+		}
+
+		function update_setups(data) {
+			update_setup(data["setup"]["players"], "#setup");
+			update_setup(data["final_setup"], "#game");
 		}
 	</script>
 	{% if user.is_authenticated %}
@@ -109,7 +121,7 @@
 		}
 
 		get_players("#players");
-		// setInterval(get_players, 10 * 1000, "#players");
+		setInterval(get_players, 3 * 1000, "#players");
 
 		$("#update").click(function (event) {
 			get_players("#players");
@@ -125,6 +137,7 @@
 				function (i, val) {
 					return {
 						id: val.id,
+						username: $(val).attr("username"),
 						team: Number($(val).attr("team")),
 						nation: $(val).attr("nation"),
 					}
@@ -145,13 +158,26 @@
 				},
 				dataType: 'json'
 			})
-			.done(function (data){
-				update_setup(data["setup"]["players"], "#setup");
-				update_setup(data["final_setup"], "#game");
-			});
+			.done(update_setups);
 		}
 
 		$("#randomize").click(randomize);
+	</script>
+
+	{% else %}
+	<script type="text/javascript">
+		function get_setups() {
+			$.ajax({
+				url: "{% url 'ajax:randomize'%}",
+				method: 'GET',
+			})
+			.done(update_setups);
+		}
+
+		get_setups();
+		setInterval(get_setups, 3 * 1000);
+		$("#get_setups").click(get_setups);
+
 	</script>
 	{% endif %}
 {% endblock script %}
