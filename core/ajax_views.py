@@ -48,19 +48,25 @@ class Randomize(View):
 		return self.get_current_game(request)
 
 	def randomize(self, setup):
-		n_teams = setup["n_teams"]
 		final_setup = []
 		for player in setup["players"]:
 			final_player = dict(player)
-
-			if player["team"] == self.RND_TEAM:
-				final_player["team"] = random.choice(range(1, n_teams+1))
 
 			if player["nation"] == self.RND_NATION:
 				final_player["nation"] = random.choice(self.NATIONS)
 
 			final_setup.append(final_player)
+
+		self.randomize_teams(final_setup, setup["n_teams"])
 		return final_setup
+
+	def randomize_teams(self, setup, n_teams):
+		players_to_rnd = [player for player in setup if player["team"] == self.RND_TEAM]
+
+		random.shuffle(players_to_rnd)
+
+		for i, player in enumerate(players_to_rnd):
+			player["team"] = i % n_teams + 1
 
 	def save_game(self, setup, final_setup):
 		with open(self.GAME_FILE, "w") as f:
