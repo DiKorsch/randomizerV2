@@ -1,11 +1,11 @@
 from django.conf import settings
 from django.shortcuts import redirect
 from django.utils import timezone as tz
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
 from core.decorators import context_render
 from core.decorators import ensure_uuid
-from django.utils.decorators import method_decorator
 from core.forms import NewPlayerForm
 from core.models import Player
 
