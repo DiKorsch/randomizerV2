@@ -1,0 +1,22 @@
+version: '3.1'
+
+services:
+  web:
+    image: dikorsch/randomizer:latest
+    restart: unless-stopped
+
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+
+    ports:
+      - "8000:${PORT}"
+
+    environment:
+      DEBUG: ${DEBUG}
+
+    volumes:
+      # mount code folder
+      - .:/code:ro
+
+    env_file:
+      - .env
+

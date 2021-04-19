@@ -1,0 +1,7 @@
+.git
+Dockerfile
+01_install.sh
+dockerenv
+db.sqlite3
+secret_key.txt
+*.json

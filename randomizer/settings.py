@@ -34,9 +34,12 @@ with open(SECRET_FILE, "r") as f:
     SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+try:
+    DEBUG = bool(int(os.environ.get("DEBUG", 1)))
+except:
+    DEBUG = 1
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [ "rnd.dikorsch.de", "localhost", "127.0.0.1" ]
 
 
 # Application definition
