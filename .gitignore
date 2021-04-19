@@ -62,5 +62,6 @@ docs/_build/
 
 # PyBuilder
 target/
-
+.venv
 game.json
+
