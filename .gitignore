@@ -1,4 +1,6 @@
+!static/*
 static/*
+!static/.gitkeep
 *.pyc
 *.sqlite3
 secret_key.txt
