@@ -5,15 +5,28 @@ services:
     image: dikorsch/randomizer:latest
     restart: unless-stopped
 
-    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash 20_run_server.sh
 
-    ports:
-      - "8000:${PORT:-8000}"
+    expose:
+      - "${PORT:-8000}"
 
     volumes:
       # mount code folder
-      - .:/code:ro
+      - .:/code:rw
 
     env_file:
       - dockerenv
+
+  nginx:
+    image: nginx:latest
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - ./config/nginx:/etc/nginx/conf.d
+      - ./static:/code/static
+
+    depends_on:
+      - web
 
