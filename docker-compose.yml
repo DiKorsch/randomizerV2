@@ -7,14 +7,26 @@ services:
 
     command: bash 20_run_server.sh
 
-    ports:
-      - "8000:${PORT:-8000}"
+    expose:
+      - "${PORT:-8000}"
 
     volumes:
       # mount code folder
-      - .:/code:ro
-      - ./static:/code/static:rw
+      - .:/code:rw
 
     env_file:
       - dockerenv
+
+  nginx:
+    image: nginx:latest
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - ./config/nginx:/etc/nginx/conf.d
+      - ./static:/code/static
+
+    depends_on:
+      - web
 
